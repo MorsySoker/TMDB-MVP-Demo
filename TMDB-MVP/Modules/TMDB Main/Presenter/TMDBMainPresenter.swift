@@ -6,6 +6,11 @@
 //
 
 import Foundation
+import UIKit
+
+    //MARK: - TypeAlies
+
+typealias PresnterDelegate = TMDBMainPresenterProtocol & UIViewController
 
     //MARK: - Presenter Protocol
 
@@ -20,13 +25,15 @@ final class TMDBMainPresenter {
     
     // MARK: - Properties
     
-    private let worker: MoviesManager
+    private let worker = MoviesManager()
+    weak var delegate: PresnterDelegate?
     
     
-    // MARK: - Init
+
+    //MARK: - Set View Delegate
     
-    init(worker: MoviesManager) {
-        self.worker = worker
+    func setViewDelegate(delegate: PresnterDelegate){
+        self.delegate = delegate
     }
     
     // MARK: - Functions
@@ -37,11 +44,16 @@ final class TMDBMainPresenter {
             guard let this = self else {return}
             switch result {
             case .success(let movies):
-                print(movies)
+                this.convertToViewModel(movies: movies.all)
             case .failure(let error):
                 print(error)
             }
         }
+    }
+    
+    private func convertToViewModel(movies: [Movie]){
+         let movies = movies.compactMap {$0.model}
+        self.delegate?.showMovies(movies: movies)
     }
     
 }
